@@ -6,6 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"io"
+	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/aws/aws-sdk-go/service/elbv2"
@@ -37,7 +38,7 @@ func NewCmdDeleteAws(f Factory, out io.Writer, errOut io.Writer) *cobra.Command 
 		},
 	}
 	cmd.Flags().StringVarP(&options.VpcId, "vpc-id", "", "", "ID of VPC to delete.")
-	cmd.Flags().StringVarP(&options.Region, "region", "", "", "AWS region to use.")
+	cmd.Flags().StringVarP(&options.Region, "region", "", "", "AWS region to use. Defaults to us-west-2.")
 
 	return cmd
 }
@@ -45,7 +46,17 @@ func NewCmdDeleteAws(f Factory, out io.Writer, errOut io.Writer) *cobra.Command 
 func (o *DeleteAwsOptions) Run() error {
 	vpcid := o.VpcId
 
-	svc := ec2.New(session.New(&aws.Config{Region: aws.String(o.Region)}))
+	region := o.Region
+	if region == "" {
+		region := os.Getenv("AWS_REGION")
+		if region == "" {
+			region = os.Getenv("AWS_DEFAULT_REGION")
+			if region == "" {
+				region = "us-west-2"
+			}
+		}
+	}
+	svc := ec2.New(session.New(&aws.Config{Region: aws.String(region)}))
 
 	// Delete elastic load balancers assigned to VPC
 	elbSvc :=  elbv2.New(session.New(&aws.Config{Region: aws.String(o.Region)}))
