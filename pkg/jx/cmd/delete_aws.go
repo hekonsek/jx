@@ -52,10 +52,11 @@ func (o *DeleteAwsOptions) Run() error {
 	if region == "" {
 		region = amazon.ResolveRegion()
 	}
-	svc := ec2.New(session.New(&aws.Config{Region: aws.String(region)}))
+	awsRegion := aws.String(region)
+	svc := ec2.New(session.New(&aws.Config{Region: awsRegion}))
 
 	// Delete elastic load balancers assigned to VPC
-	elbSvc := elbv2.New(session.New(&aws.Config{Region: aws.String(o.Region)}))
+	elbSvc := elbv2.New(session.New(&aws.Config{Region: awsRegion}))
 	loadBalancers, err := elbSvc.DescribeLoadBalancers(&elbv2.DescribeLoadBalancersInput{})
 	if err != nil {
 		return err
