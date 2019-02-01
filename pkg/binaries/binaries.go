@@ -94,7 +94,7 @@ func LoadInstalledPackages() (map[string]string, error) {
 
 func RememberInstalledPackage(packageName string, version string) error {
 	versions, err := LoadInstalledPackages()
-	if err!= nil {
+	if err != nil {
 		return err
 	}
 
